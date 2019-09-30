@@ -1,4 +1,3 @@
-from Match import unify
 from AST import(Node,And,Or,Arrow,Not,Var,true,false)
 from Exceptions import ProofException
 
@@ -59,13 +58,12 @@ def premise(e):
 ##########################################
 def andI(a, b, ab):
     ret = step(ab, "/\I", [a,b])
-    u = unify(And(Var("a"),Var("b")), ab)
-    if u is None:
+    if ab.type() != Node.AND:
         raise ProofException("/\\I", ab, "conclusion is not in the form A /\\ B", ret)
-    if u["a"] != a.expr:
-        raise ProofException("/\\I", a, "left hand side doesn't match conclusion", ret)
-    if u["b"] != b.expr:
-        raise ProofException("/\\I", a, "right hand side doesn't match conclusion", ret)
+    if ab.lhs != a.expr:
+        raise ProofException("/\\I", a.expr, "left hand side doesn't match conclusion", ret)
+    if ab.rhs != b.expr:
+        raise ProofException("/\\I", a.expr, "right hand side doesn't match conclusion", ret)
     return ret
 
 ##########################################
@@ -80,10 +78,9 @@ def andI(a, b, ab):
 ##########################################
 def andEL(ab, a):
     ret = step(a,"/\\EL", [ab])
-    u = unify(And(Var("a"),Var("b")), ab.expr)
-    if u is None:
+    if ab.expr.type() != Node.AND:
         raise ProofException("/\\EL", ab.expr, "premise is not in the form A /\\ B", ret)
-    if u["a"] != a:
+    if ab.expr.lhs != a:
         raise ProofException("/\\EL", a, "conslusion doesn't match left hand side of premise", ret)
     return ret
 
@@ -99,10 +96,9 @@ def andEL(ab, a):
 ##########################################
 def andER(ab, b):
     ret = step(b,"/\\ER", [ab])
-    u = unify(And(Var("a"),Var("b")), ab.expr)
-    if u is None:
+    if ab.expr.type() != Node.AND:
         raise ProofException("/\\ER", ab.expr, "premise is not in the form A /\\ B", ret)
-    if u["b"] != b:
+    if ab.expr.rhs != b:
         raise ProofException("/\\ER", b, "conslusion doesn't match right hand side of premise", ret)
     return ret
 
@@ -119,9 +115,9 @@ def andER(ab, b):
 def orIL(a, ab):
     ret = step(ab,"\\/IL", [a])
     u = unify(Or(Var("a"),Var("b")), ab)
-    if u is None:
+    if ab.type() != Node.OR:
         raise ProofException("\\/IL", ab, "conclusion is not in the form A /\\ B", ret)
-    if u["a"] != a.expr:
+    if ab.lhs != a.expr:
         raise ProofException("\\/IL", a.expr, "left hand side of conclusion doesn't match premise", ret)
     return ret
 
@@ -138,9 +134,9 @@ def orIL(a, ab):
 def orIR(b, ab):
     ret = step(ab,"\\/IL", [b])
     u = unify(Or(Var("a"),Var("b")), ab)
-    if u is None:
+    if ab.type() != Node.OR:
         raise ProofException("\\/IR", ab, "conclusion is not in the form A /\\ B", ret)
-    if u["b"] != b.expr:
+    if ab.rhs != b.expr:
         raise ProofException("\\/IR", b.expr, "right hand side of conclusion doesn't match premise", ret)
     return ret
 
@@ -158,22 +154,19 @@ def orIR(b, ab):
 ##########################################
 def orE(ab, ac, bc, c):
     ret = step(c, "||R", [ab, ac, bc])
-    uab = unify(Or(Var("a"),Var("b")), ab.expr)
-    uac = unify(Arrow(Var("a"),Var("c")), ac.expr)
-    ubc = unify(Arrow(Var("b"),Var("c")), bc.expr)
-    if uab is None:
-        raise ProofException("\\/E", ab, "premise doesn't match A \\/ B", ret)
-    if uac is None:
-        raise ProofException("\\/E", ac, "premise doesn't match A -> C", ret)
-    if ubc is None:
-        raise ProofException("\\/E", bc, "premise doesn't match B -> C", ret)
-    if uab["a"] != uac["a"]:
-        raise ProofException("\\/E", ab.expr, "A doesn't match: %s != %s" % (str(uab["a"]), str(uac["a"])), ret)
-    if uab["b"] != ubc["b"]:
-        raise ProofException("\\/E", ab.expr, "B doesn't match: %s != %s" % (str(uab["b"]), str(ubc["b"])), ret)
-    if uac["c"] != ubc["c"]:
-        raise ProofException("\\/E", ac.expr, "C doesn't match: %s != %s" % (str(uac["c"]), str(ubc["c"])), ret)
-    if uac["c"] != c:
+    if ab.expr.type() != Node.OR:
+        raise ProofException("\\/E", ab.expr, "premise doesn't match A \\/ B", ret)
+    if ac.expr.type() != Node.ARROW:
+        raise ProofException("\\/E", ac.expr, "premise doesn't match A -> C", ret)
+    if bc.expr.type() != Node.ARROW:
+        raise ProofException("\\/E", bc.expr, "premise doesn't match B -> C", ret)
+    if ab.expr.lhs != ac.expr.lhs:
+        raise ProofException("\\/E", ab.expr, "A doesn't match: %s != %s" % (str(ab.expr.lhs), str(ac.expr.lhs)), ret)
+    if ab.expr.rhs != bc.expr.lhs:
+        raise ProofException("\\/E", ab.expr, "B doesn't match: %s != %s" % (str(ab.expr.rhs), str(bc.expr.lhs)), ret)
+    if ac.expr.rhs != bc.expr.rhs:
+        raise ProofException("\\/E", ac.expr, "C doesn't match: %s != %s" % (str(ac.expr.rhs), str(bc.expr.rhs)), ret)
+    if ac.expr.rhs != c:
         raise ProofException("\\/E", c, "C doesn't match conclusion", ret)
     return ret
 
@@ -221,15 +214,14 @@ def assumed(a):
 ##########################################
 def arrowI(a, b, ab):
     ret = step(ab, "->I", [a,b])
-    u = unify(Arrow(Var("a"),Var("b")),ab)
-    if u is None:
+    if ab.type() != Node.ARROW:
         raise ProofException("->I", ab, "conclusion doesn't match A -> B", ret)
-    if u["a"] != a.expr:
+    if ab.lhs != a.expr:
         raise ProofException("->I", a.expr, "left hand side doens't match conclusion", ret)
-    if u["b"] != b.expr:
+    if ab.rhs != b.expr:
         raise ProofException("->I", b.expr, "right hand side doens't match conclusion", ret)
     if assumptions[-1] != a.expr:
-        raise ProofException("->I", a, "A was not the last assumption made", ret)
+        raise ProofException("->I", a.expr, "A was not the last assumption made", ret)
     assumptions.pop()
     return ret
 
@@ -246,12 +238,11 @@ def arrowI(a, b, ab):
 ##########################################
 def arrowE(a, ab, b):
     ret = step(b, "->E", [a,ab])
-    u = unify(Arrow(Var("a"),Var("b")),ab.expr)
-    if u is None:
+    if ab.expr.type() != Node.ARROW:
         raise ProofException("->E", ab, "premise doesn't match A -> B", ret)
-    if u["a"] != a.expr:
+    if ab.expr.lhs != a.expr:
         raise ProofException("->E", a.expr, "left hand side doens't match", ret)
-    if u["b"] != b.expr:
+    if ab.expr.rhs != b.expr:
         raise ProofException("->E", b.expr, "conclusion doens't match right hand side", ret)
     return ret
 
@@ -268,9 +259,9 @@ def arrowE(a, ab, b):
 def notI(af, na):
     ret = step(na, "~I", [af])
     u = unify(Arrow(Var("a"),false()),af.expr)
-    if u is None:
-        raise ProofException("~I", af, "premise doesn't match A -> F", ret)
-    if Not(u["a"]) != na:
+    if af.expr.type() != Node.Arrow or af.expr.rhs != false():
+        raise ProofException("~I", af.expr, "premise doesn't match A -> F", ret)
+    if Not(af.expr.lhs) != na:
         raise ProofException("~I", na, "conclusion doesn't match premise", ret)
     return ret
         
@@ -288,17 +279,14 @@ def notI(af, na):
 def notE(a, na, f):
     ret = step(f, "~E", [a,na])
     u = unify(Not(Var("a")), na.expr)
-    if u is None:
-        raise ProofException("~E", na, "premise doesn't match ~A", ret)
-    if u["a"] != a.expr:
-        raise ProofException("~E", a, "premises don't match", ret)
+    if na.expr.type() != Node.NOT:
+        raise ProofException("~E", na.expr, "premise doesn't match ~A", ret)
+    if na.expr.lhs != a.expr:
+        raise ProofException("~E", a.expr, "premises don't match", ret)
     if f != false():
         raise ProofException("~E", f, "conclusion must be false", ret)
     return ret
 
-#               F
-# ----- TI   ------ FE  --------- LEM
-#   T           A        A || ~A
 ##########################################
 #           
 # ------- TI
@@ -342,7 +330,9 @@ def FE(f, a):
 def LEM(a):
     ret = step(a,"LEM",[])
     u = unify(Or(Var("a"),Not(Var("a"))), a)
-    if u is None:
+    if a.type() != Node.OR or \
+       a.rhs.type() != Node.NOT or \
+       a.lhs != a.rhs.lhs:
         raise ProofException("LEM", a, "conclusion doens't match A \\/ ~A", ret)
     return ret
 
