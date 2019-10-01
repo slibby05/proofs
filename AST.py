@@ -92,7 +92,7 @@ class And():
         self.rhs = r
 
     def __str__(self):
-        return "(" + str(self.lhs) + " && " + str(self.rhs) + ")"
+        return "(" + str(self.lhs) + " ∧ " + str(self.rhs) + ")"
 
     def __eq__(self, other):
         return self.type() == other.type() and \
@@ -120,7 +120,7 @@ class Or():
         self.rhs = r
 
     def __str__(self):
-        return "(" + str(self.lhs) + " || " + str(self.rhs) + ")"
+        return "(" + str(self.lhs) + " ∨ " + str(self.rhs) + ")"
 
     def __eq__(self, other):
         return self.type() == other.type() and \
@@ -148,7 +148,7 @@ class Arrow():
         self.rhs = r
 
     def __str__(self):
-        return "(" + str(self.lhs) + " -> " + str(self.rhs) + ")"
+        return "(" + str(self.lhs) + " → " + str(self.rhs) + ")"
 
     def __eq__(self, other):
         return self.type() == other.type() and \
@@ -175,7 +175,7 @@ class Not():
         self.lhs = l
 
     def __str__(self):
-        return "(~ " + str(self.lhs) + ")"
+        return "(¬ " + str(self.lhs) + ")"
 
     def __eq__(self, other):
         return self.type() == other.type() and \
@@ -204,7 +204,7 @@ class Lit():
         if self.val:
             return "T"
         else:
-            return "F"
+            return "⊥ "
 
     def __eq__(self, other):
         return self.type() == other.type() and \
@@ -283,5 +283,5 @@ def rec_eval(e, vs, i, env):
 
 def TorF(b):
     if b: return "T"
-    else: return "F"
+    else: return "⊥"
 

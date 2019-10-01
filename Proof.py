@@ -5,28 +5,28 @@ from Exceptions import ProofException
 # This is a very small, and probably bad, proof checker for propositional logic
 # The proof rules are the same ones we have in class.
 #
-#  A  B     A && B      A && B 
-# ------/\I ------ /\EL ------/\ER
-# A && B       A          B
+#  A  B      A ∧ B      A ∧ B 
+# ------∧ I ------∧ EL ------∧ ER
+# A ∧ B        A          B
 #
-#    A         B        A || B A -> C B -> C
-# ------\/IL ------\/IR -------------------- \/E
-# A || B     A || B              C
+#    A         B         A ∨ B A →  C B →  C
+# ------∨ IL ------∨ IR --------------------∨ E
+# A ∨ B      A ∨ B               C
 # 
-# [A] B        A  A -> B
-# ------ ->I  ----------- ->E
-# A -> B           B
+# [A] B        A  A →  B
+# ------ → I  ----------- → E
+# A →  B           B
 # 
-# A -> F      A  ~A
-# ------ ~I  ------- ~E
-#   ~A          F
+# A →  F      A  ¬A
+# ------ ¬I  ------- ¬E
+#   ¬A          F
 # 
 #               F
 # ----- TI   ------ FE  --------- LEM
-#   T           A        A || ~A
+#   T           A        A ∨ ¬A
 #
 # Each of the proof rules have a corresponding function
-# so AndI() is the function for /\I rule
+# so AndI() is the function for ∧ I rule
 ####################################################################################
 
 ##########################################
@@ -47,8 +47,8 @@ def premise(e):
 
 ##########################################
 #  A  B     
-# ------/\I
-# A && B
+# ------∧ I
+# A ∧ B
 #
 # input a: a proof for A
 # input b: a proof for B
@@ -57,18 +57,18 @@ def premise(e):
 #
 ##########################################
 def andI(a, b, ab):
-    ret = step(ab, "/\I", [a,b])
+    ret = step(ab, "∧ I", [a,b])
     if ab.type() != Node.AND:
-        raise ProofException("/\\I", ab, "conclusion is not in the form A /\\ B", ret)
+        raise ProofException("∧ I", ab, "conclusion is not in the form A ∧ B", ret)
     if ab.lhs != a.expr:
-        raise ProofException("/\\I", a.expr, "left hand side doesn't match conclusion", ret)
+        raise ProofException("∧ I", a.expr, "left hand side doesn't match conclusion", ret)
     if ab.rhs != b.expr:
-        raise ProofException("/\\I", a.expr, "right hand side doesn't match conclusion", ret)
+        raise ProofException("∧ I", a.expr, "right hand side doesn't match conclusion", ret)
     return ret
 
 ##########################################
-# A && B     
-# ------ /\EL
+# A ∧ B     
+# ------ ∧ EL
 #    A       
 #
 # input ab: a proof for And(A,B)
@@ -77,16 +77,16 @@ def andI(a, b, ab):
 #
 ##########################################
 def andEL(ab, a):
-    ret = step(a,"/\\EL", [ab])
+    ret = step(a,"∧ EL", [ab])
     if ab.expr.type() != Node.AND:
-        raise ProofException("/\\EL", ab.expr, "premise is not in the form A /\\ B", ret)
+        raise ProofException("∧ EL", ab.expr, "premise is not in the form A ∧ B", ret)
     if ab.expr.lhs != a:
-        raise ProofException("/\\EL", a, "conslusion doesn't match left hand side of premise", ret)
+        raise ProofException("∧ EL", a, "conslusion doesn't match left hand side of premise", ret)
     return ret
 
 ##########################################
-# A && B     
-# ------ /\ER
+# A ∧ B     
+# ------ ∧ ER
 #    B       
 #
 # input ab: a proof for And(A,B)
@@ -95,17 +95,17 @@ def andEL(ab, a):
 #
 ##########################################
 def andER(ab, b):
-    ret = step(b,"/\\ER", [ab])
+    ret = step(b,"∧ ER", [ab])
     if ab.expr.type() != Node.AND:
-        raise ProofException("/\\ER", ab.expr, "premise is not in the form A /\\ B", ret)
+        raise ProofException("∧ ER", ab.expr, "premise is not in the form A ∧ B", ret)
     if ab.expr.rhs != b:
-        raise ProofException("/\\ER", b, "conslusion doesn't match right hand side of premise", ret)
+        raise ProofException("∧ ER", b, "conslusion doesn't match right hand side of premise", ret)
     return ret
 
 ##########################################
 #    A      
-# ------\/IL
-# A || B    
+# ------∨ IL
+# A ∨ B    
 #
 # input a: a proof for A
 # input ab: the expression Or(A,B)
@@ -113,18 +113,17 @@ def andER(ab, b):
 #
 ##########################################
 def orIL(a, ab):
-    ret = step(ab,"\\/IL", [a])
-    u = unify(Or(Var("a"),Var("b")), ab)
+    ret = step(ab,"∨ IL", [a])
     if ab.type() != Node.OR:
-        raise ProofException("\\/IL", ab, "conclusion is not in the form A /\\ B", ret)
+        raise ProofException("∨ IL", ab, "conclusion is not in the form A ∧ B", ret)
     if ab.lhs != a.expr:
-        raise ProofException("\\/IL", a.expr, "left hand side of conclusion doesn't match premise", ret)
+        raise ProofException("∨ IL", a.expr, "left hand side of conclusion doesn't match premise", ret)
     return ret
 
 ##########################################
 #    B      
-# ------\/IR
-# A || B    
+# ------∨ IR
+# A ∨ B    
 #
 # input a: a proof for B
 # input ab: the expression Or(A,B)
@@ -132,17 +131,16 @@ def orIL(a, ab):
 #
 ##########################################
 def orIR(b, ab):
-    ret = step(ab,"\\/IL", [b])
-    u = unify(Or(Var("a"),Var("b")), ab)
+    ret = step(ab,"∨ IL", [b])
     if ab.type() != Node.OR:
-        raise ProofException("\\/IR", ab, "conclusion is not in the form A /\\ B", ret)
+        raise ProofException("∨ IR", ab, "conclusion is not in the form A ∧ B", ret)
     if ab.rhs != b.expr:
-        raise ProofException("\\/IR", b.expr, "right hand side of conclusion doesn't match premise", ret)
+        raise ProofException("∨ IR", b.expr, "right hand side of conclusion doesn't match premise", ret)
     return ret
 
 ##########################################
-# A||B A->C B->C
-# ---------------\/E
+# A∨ B A→ C B→ C
+# ---------------∨ E
 #       C              
 #
 # input ab: a proof for Or(A,B)
@@ -153,25 +151,25 @@ def orIR(b, ab):
 #
 ##########################################
 def orE(ab, ac, bc, c):
-    ret = step(c, "||R", [ab, ac, bc])
+    ret = step(c, "∨ E", [ab, ac, bc])
     if ab.expr.type() != Node.OR:
-        raise ProofException("\\/E", ab.expr, "premise doesn't match A \\/ B", ret)
+        raise ProofException("∨ E", ab.expr, "premise doesn't match A ∨ B", ret)
     if ac.expr.type() != Node.ARROW:
-        raise ProofException("\\/E", ac.expr, "premise doesn't match A -> C", ret)
+        raise ProofException("∨ E", ac.expr, "premise doesn't match A → C", ret)
     if bc.expr.type() != Node.ARROW:
-        raise ProofException("\\/E", bc.expr, "premise doesn't match B -> C", ret)
+        raise ProofException("∨ E", bc.expr, "premise doesn't match B → C", ret)
     if ab.expr.lhs != ac.expr.lhs:
-        raise ProofException("\\/E", ab.expr, "A doesn't match: %s != %s" % (str(ab.expr.lhs), str(ac.expr.lhs)), ret)
+        raise ProofException("∨ E", ab.expr, "A doesn't match: %s != %s" % (str(ab.expr.lhs), str(ac.expr.lhs)), ret)
     if ab.expr.rhs != bc.expr.lhs:
-        raise ProofException("\\/E", ab.expr, "B doesn't match: %s != %s" % (str(ab.expr.rhs), str(bc.expr.lhs)), ret)
+        raise ProofException("∨ E", ab.expr, "B doesn't match: %s != %s" % (str(ab.expr.rhs), str(bc.expr.lhs)), ret)
     if ac.expr.rhs != bc.expr.rhs:
-        raise ProofException("\\/E", ac.expr, "C doesn't match: %s != %s" % (str(ac.expr.rhs), str(bc.expr.rhs)), ret)
+        raise ProofException("∨ E", ac.expr, "C doesn't match: %s != %s" % (str(ac.expr.rhs), str(bc.expr.rhs)), ret)
     if ac.expr.rhs != c:
-        raise ProofException("\\/E", c, "C doesn't match conclusion", ret)
+        raise ProofException("∨ E", c, "C doesn't match conclusion", ret)
     return ret
 
 ##########################################
-# used in ->I rule
+# used in → I rule
 # 
 # -----Assume
 #   a        
@@ -202,89 +200,86 @@ def assumed(a):
 
 ##########################################
 # [A] B     
-# ------ ->I
-# A -> B    
+# ------ → I
+# A →  B    
 #
 # input a: a proof that we've assumed a
 # input b: a proof of B that can use the assumption A
-# input ab: a an expression A -> B
-# output: a proof of A -> B
+# input ab: a an expression A →  B
+# output: a proof of A →  B
 # Note: the removes A from the possible assumtions
 #
 ##########################################
 def arrowI(a, b, ab):
-    ret = step(ab, "->I", [a,b])
+    ret = step(ab, "→ I", [a,b])
     if ab.type() != Node.ARROW:
-        raise ProofException("->I", ab, "conclusion doesn't match A -> B", ret)
+        raise ProofException("→ I", ab, "conclusion doesn't match A → B", ret)
     if ab.lhs != a.expr:
-        raise ProofException("->I", a.expr, "left hand side doens't match conclusion", ret)
+        raise ProofException("→ I", a.expr, "left hand side doens't match conclusion", ret)
     if ab.rhs != b.expr:
-        raise ProofException("->I", b.expr, "right hand side doens't match conclusion", ret)
-    if assumptions[-1] != a.expr:
-        raise ProofException("->I", a.expr, "A was not the last assumption made", ret)
-    assumptions.pop()
+        raise ProofException("→ I", b.expr, "right hand side doens't match conclusion", ret)
+    if assumptions.pop() != a.expr:
+        raise ProofException("→ I", a.expr, "A was not the last assumption made", ret)
     return ret
 
 ##########################################
-#  A  A->B     
-# --------- ->E
+#  A  A→ B     
+# --------- → E
 #    B
 #
 # input a: a proof a A
-# input ab: a proof of A -> B
+# input ab: a proof of A →  B
 # input b: an expression B
 # output: a proof of B
 #
 ##########################################
 def arrowE(a, ab, b):
-    ret = step(b, "->E", [a,ab])
+    ret = step(b, "→ E", [a,ab])
     if ab.expr.type() != Node.ARROW:
-        raise ProofException("->E", ab, "premise doesn't match A -> B", ret)
+        raise ProofException("→ E", ab, "premise doesn't match A → B", ret)
     if ab.expr.lhs != a.expr:
-        raise ProofException("->E", a.expr, "left hand side doens't match", ret)
-    if ab.expr.rhs != b.expr:
-        raise ProofException("->E", b.expr, "conclusion doens't match right hand side", ret)
+        raise ProofException("→ E", a.expr, "left hand side doens't match", ret)
+    if ab.expr.rhs != b:
+        raise ProofException("→ E", b.expr, "conclusion doens't match right hand side", ret)
     return ret
 
 ##########################################
-# A -> F   
-# ------ ~I
-#   ~A     
+# A → F   
+# ------ ¬I
+#   ¬A     
 #
-# input af: a proof of A -> F
-# input na: a expression ~A
-# output: a proof of ~A
+# input af: a proof of A → F
+# input na: a expression ¬A
+# output: a proof of ¬A
 #
 ##########################################
 def notI(af, na):
-    ret = step(na, "~I", [af])
-    u = unify(Arrow(Var("a"),false()),af.expr)
-    if af.expr.type() != Node.Arrow or af.expr.rhs != false():
-        raise ProofException("~I", af.expr, "premise doesn't match A -> F", ret)
+    ret = step(na, "¬I", [af])
+    if af.expr.type() != Node.ARROW or af.expr.rhs != false():
+        raise ProofException("¬I", af.expr, "premise doesn't match A → F", ret)
     if Not(af.expr.lhs) != na:
-        raise ProofException("~I", na, "conclusion doesn't match premise", ret)
+        raise ProofException("¬I", na, "conclusion doesn't match premise", ret)
     return ret
         
 ##########################################
-#  A  ~A    
-# ------- ~E
+#  A  ¬A    
+# ------- ¬E
 #    F      
 #
 # input a: a proof of A
-# input na: a proof of ~A
+# input na: a proof of ¬A
 # input f: a expression F
 # output: a proof F
 #
 ##########################################
 def notE(a, na, f):
-    ret = step(f, "~E", [a,na])
-    u = unify(Not(Var("a")), na.expr)
+    ret = step(f, "¬E", [a,na])
     if na.expr.type() != Node.NOT:
-        raise ProofException("~E", na.expr, "premise doesn't match ~A", ret)
+        raise ProofException("¬E", na.expr, "premise doesn't match ¬A", ret)
     if na.expr.lhs != a.expr:
-        raise ProofException("~E", a.expr, "premises don't match", ret)
+        raise ProofException("¬E", a.expr, "premises don't match", ret)
     if f != false():
-        raise ProofException("~E", f, "conclusion must be false", ret)
+        raise ProofException("¬E", f, "conclusion must be false", ret)
     return ret
 
 ##########################################
@@ -313,27 +308,26 @@ def TI(t):
 #
 ##########################################
 def FE(f, a):
-    ret = step(a,"FE",[f])
+    ret = step(a,"⊥ E",[f])
     if f.expr != false():
-        raise ProofException("FI", f.expr, "premise must be flase", ret)
+        raise ProofException("⊥ E", f.expr, "premise must be flase", ret)
     return ret
 
 ##########################################
 # 
 # --------- LEM
-#  A || ~A
+#  A ∨ ¬A
 #
-# input a: a expression (A || ~A)
-# output: a proof of (A || ~A)
+# input a: a expression (A ∨ ¬A)
+# output: a proof of (A ∨ ¬A)
 #
 ##########################################
 def LEM(a):
     ret = step(a,"LEM",[])
-    u = unify(Or(Var("a"),Not(Var("a"))), a)
     if a.type() != Node.OR or \
        a.rhs.type() != Node.NOT or \
        a.lhs != a.rhs.lhs:
-        raise ProofException("LEM", a, "conclusion doens't match A \\/ ~A", ret)
+        raise ProofException("LEM", a, "conclusion doens't match A ∨ ¬A", ret)
     return ret
 
 #######################################################################################################
@@ -382,9 +376,10 @@ class step():
             s.reset()
 
     def max_assumptions(self):
-        if self.rule == "assume":
-            return 1
-        return max([s.max_assumptions() for s in self.support], default=0)
+        l = max([s.max_assumptions() for s in self.support], default=0)
+        if self.rule == "→ I":
+            return 1 + l
+        return l
 
     # prints out a proof
     # first we print what we've actually proven
@@ -414,7 +409,7 @@ class step():
             asms += 1
 
         # If we are done with an assumption, then remove it from the assumption stack
-        if self.rule == "->I":
+        if self.rule == "→ I":
             asms -= 1
 
         # set what line we're on
@@ -430,9 +425,7 @@ class step():
 
         # print the actual step out in the form "line : expr | support"
         print("%5d: %60s | %10s" % (line_no, str(self.expr), self.rule), end = " ")
-        for s in self.support:
-            print("%d," % s.line, end=" ")
-        print("")
+        print(", ".join([str(s.line) for s in self.support]))
         
         # move onto the next line
         return (line_no + 1, asms)

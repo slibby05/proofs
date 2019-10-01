@@ -149,19 +149,22 @@ def term(tokens):
     e = None
     if tokens[0].ttype == TType.TVAR:
         e = Var(tokens[0].val)
+        tokens.pop(0)
     elif tokens[0].ttype == TType.TTRUE:
         e = true()
+        tokens.pop(0)
     elif tokens[0].ttype == TType.TFALSE:
         e = false()
+        tokens.pop(0)
     elif tokens[0].ttype == TType.TLPAREN:
         tokens.pop(0)
         e = expr(tokens)
         if tokens[0].ttype != TType.TRPAREN:
             raise ParseException(tokens[0].pos,[TType.TRPAREN],tokens[0].val)
+        tokens.pop(0)
     else:
         raise ParseException(tokens[0].pos,first,tokens[0].val)
 
-    tokens.pop(0)
 
     if tokens[0].ttype not in follow:
         raise ParseException(tokens[0].pos,follow,tokens[0].val)
