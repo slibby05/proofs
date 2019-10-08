@@ -62,7 +62,13 @@ def arrTrans():
 
     a1 = assume(a)
 
-    return arrowI(a1, arrowE(arrowE(assumed(a), p1, b), p2, c), Arrow(a,c))
+    return arrowI(a1, \
+                  arrowE(arrowE(assumed(a), \
+                                p1, \
+                                b), \
+                         p2, \
+                         c), \
+                  Arrow(a,c))
 
     # linear (3-column) proof
     # l1 = assumed(a)
